@@ -3,6 +3,7 @@ package org.senia.amazon.nexrad;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,38 +29,37 @@ public class AwsS3 {
 		/*
 		 * Get AWS Anonymous Creds for NexradL2 Bucket
 		 */
-		AWSCredentials creds = new AnonymousAWSCredentials();
-
-		Region eastRegion = Region.getRegion(Regions.US_EAST_1);
-		String nexradL2Bucket = "noaa-nexrad-level2";
-
-		AmazonS3 s3 = new AmazonS3Client(creds);
-		s3.setRegion(eastRegion);
-
-		ListObjectsRequest lor = new ListObjectsRequest().withBucketName(nexradL2Bucket).withPrefix(path);
-		ObjectListing objectListing = s3.listObjects(lor);
-		log.debug("Nexrad Amazon Bucket: " + objectListing.getBucketName());
-		int lastObject = objectListing.getObjectSummaries().size();
-		log.debug("Number of Available Nexrad Objects: " + String.valueOf(lastObject));
-		String radarObj = objectListing.getObjectSummaries().get(lastObject - 1).getKey();
-		for (S3ObjectSummary summary : objectListing.getObjectSummaries()) {
-			log.debug(summary.getKey());
-		}
-		S3Object obj = s3.getObject(new GetObjectRequest(nexradL2Bucket, radarObj));
-		File file = new File("/tmp/AWSStorage/" + radarObj + ".ar2v");
-
-		// if the directory does not exist, create it
-		if (!file.getParentFile().exists()) {
-			file.getParentFile().mkdirs();
-		}
-
 		try {
-			IOUtils.copy(obj.getObjectContent(), new FileOutputStream(file));
+			AWSCredentials creds = new AnonymousAWSCredentials();
 
-		} catch (Exception e) {
-			e.printStackTrace();
+			Region eastRegion = Region.getRegion(Regions.US_EAST_1);
+			String nexradL2Bucket = "noaa-nexrad-level2";
+
+			AmazonS3 s3 = new AmazonS3Client(creds);
+			s3.setRegion(eastRegion);
+
+			ListObjectsRequest lor = new ListObjectsRequest().withBucketName(nexradL2Bucket).withPrefix(path);
+			ObjectListing objectListing = s3.listObjects(lor);
+			log.debug("Nexrad Amazon Bucket: " + objectListing.getBucketName());
+			int lastObject = objectListing.getObjectSummaries().size();
+			log.debug("Number of Available Nexrad Objects: " + String.valueOf(lastObject));
+			String radarObj = objectListing.getObjectSummaries().get(lastObject - 1).getKey();
+			for (S3ObjectSummary summary : objectListing.getObjectSummaries()) {
+				log.debug(summary.getKey());
+			}
+			S3Object obj = s3.getObject(new GetObjectRequest(nexradL2Bucket, radarObj));
+			File file = new File("/tmp/AWSStorage/" + radarObj + ".ar2v");
+
+			// if the directory does not exist, create it
+			if (!file.getParentFile().exists()) {
+				file.getParentFile().mkdirs();
+			}
+
+			IOUtils.copy(obj.getObjectContent(), new FileOutputStream(file));
+			log.debug(radarObj);
+		} catch (Exception ue) {
+			ue.printStackTrace();
 		}
-		log.debug(radarObj);
 
 	}
 }
