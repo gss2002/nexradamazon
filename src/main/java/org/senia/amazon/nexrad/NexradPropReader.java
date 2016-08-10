@@ -6,8 +6,13 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class NexradPropReader {	
+	private static final Logger log = LoggerFactory.getLogger(NexradPropReader.class);
+
     public Properties getNexradConfig(String propPath) throws IOException {
         InputStream is = null;
         try {
@@ -15,7 +20,7 @@ public class NexradPropReader {
                 URLConnection conn = url.openConnection();
                 is = conn.getInputStream();
         } catch (IOException ioe) {
-                System.out.println("JNDI IO Exception " + ioe );
+                log.debug("IO Exception " + ioe );
         }
         Properties prop = new Properties();
         prop.load(is);

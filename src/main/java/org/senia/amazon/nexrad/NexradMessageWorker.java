@@ -3,6 +3,9 @@ package org.senia.amazon.nexrad;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
@@ -15,7 +18,7 @@ import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 
 public class NexradMessageWorker extends Thread implements Runnable {
-
+	private static final Logger log = LoggerFactory.getLogger(NexradMessageWorker.class);
 	private final Object lock = new Object();
 	private static String QUEUE = "NEXRL2Queue";
 	private static String accessKey = "";
@@ -35,18 +38,19 @@ public class NexradMessageWorker extends Thread implements Runnable {
 		accessKey = nexrProps.getProperty("accessKey");
 		secretKey = nexrProps.getProperty("secretKey");
 		QUEUE = nexrProps.getProperty("queueKey");
+		log.info("Amazon QueueName: "+QUEUE);
 		this.command = s;
 	}
 
 	@Override
 	public void run() {
 		synchronized (lock){
-			System.out.println(Thread.currentThread().getName()
+			log.info(Thread.currentThread().getName()
 				+ " Start. Command = " + command);
 			while (true){
 				getMessages();
 				try {
-					System.out.println("Wait For Messages");
+					log.debug("Backoff - waiting for messages");
 					lock.wait(5000L);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -58,7 +62,6 @@ public class NexradMessageWorker extends Thread implements Runnable {
 	
 	private void getMessages() {
 		BasicAWSCredentials awsCreds = new BasicAWSCredentials(accessKey,secretKey);
-
 
 		ClientConfiguration cc = new ClientConfiguration();
 		AmazonSQS sqs = new AmazonSQSClient(awsCreds, cc);
@@ -79,14 +82,14 @@ public class NexradMessageWorker extends Thread implements Runnable {
 					String body = s.getBody();
 					String path = getPath(body);
 					String site = path.split("/")[3];
-					System.out.println("Key: "+path);
+					log.debug("Key: "+path);
 					if (site.equalsIgnoreCase("KOKX")||site.equalsIgnoreCase("KDOX") ) {
-						NexradL2Engine.queueMap.add(path);						
+						NexradL2Engine.queueMap.add(path);
+				        synchronized (QueueMonitor.lockObj) {
+	                        QueueMonitor.lockObj.notify();
+				        }
 					}
 					deleteMessage(sqs, s);
-			        synchronized (QueueMonitor.lockObj) {
-                        QueueMonitor.lockObj.notify();
-			        }
 				});
 			}
 		}

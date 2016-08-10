@@ -4,22 +4,19 @@ package org.senia.amazon.nexrad;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class NexradL2Engine {
     public static Queue<String> queueMap = new LinkedList<String>();
+	private static final Logger log = LoggerFactory.getLogger(NexradL2Engine.class);
 
 	public static void main(String[] args) {
 
 		long start = System.currentTimeMillis();
 		QueueMonitor qm = new QueueMonitor();
-		System.out.println(qm.getClass().getName());
-		/*ExecutorService executor = Executors.newFixedThreadPool(5);
-		for (int i = 1; i <= 5; i++) {
-			Runnable worker = new Worker("" + i);
-			executor.execute(worker);
-		}
-		*/
-		
+		log.info("QueueMontior Class: "+qm.getClass().getName());
 		
 		NexradMessageWorker nexradMsgThread = new NexradMessageWorker("NexradMessageThread", "file:///Users/gsenia/nexrad.queues");
 		NexradS3Worker nexradS3Worker = new NexradS3Worker();
@@ -27,10 +24,10 @@ public class NexradL2Engine {
 		nexradS3Worker.start();
 		nexradMsgThread.setName("NexradMessageThread");
 		nexradMsgThread.start();
-		System.out.println("All Threads Started");
+		log.info("Finished starting threads");
 
 		long end = System.currentTimeMillis();
-		System.out.println((end - start) + "ms");
+		log.info("StartupTime: "+(end - start) + "ms");
 
 	}
 }
