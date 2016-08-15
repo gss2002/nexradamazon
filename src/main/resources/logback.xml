@@ -10,8 +10,18 @@
     <logger name="org.senia.amazon.nexrad.QueueMonitor" level="INFO" additivity="false">
             <appender-ref ref="STDOUT" />
     </logger>
+        <logger name="org.senia.amazon.nexrad.NexradS3Worker" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT" />
+    </logger>
+            <logger name="org.senia.amazon.nexrad.AwsS3" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT" />
+    </logger>
+    <logger name="org.senia.amazon.nexrad.NexradMessageWorker" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT" />
+    </logger>
+    
     <!-- By default, the level of the root level is set to DEBUG -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>

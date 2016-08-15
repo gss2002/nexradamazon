@@ -24,8 +24,8 @@ import com.amazonaws.util.IOUtils;
 public class AwsS3 {
 	private static final Logger log = LoggerFactory.getLogger(AwsS3.class);
 
-	public void downloadNexrad(String path) throws IOException {
-
+	public File downloadNexrad(String path, String outputPath) throws IOException {
+		File file = null;
 		/*
 		 * Get AWS Anonymous Creds for NexradL2 Bucket
 		 */
@@ -48,7 +48,7 @@ public class AwsS3 {
 				log.debug(summary.getKey());
 			}
 			S3Object obj = s3.getObject(new GetObjectRequest(nexradL2Bucket, radarObj));
-			File file = new File("/tmp/AWSStorage/" + radarObj + ".ar2v");
+			file = new File(outputPath+"/" + radarObj + ".ar2v");
 
 			// if the directory does not exist, create it
 			if (!file.getParentFile().exists()) {
@@ -60,6 +60,7 @@ public class AwsS3 {
 		} catch (Exception ue) {
 			ue.printStackTrace();
 		}
+		return file;
 
 	}
 }
