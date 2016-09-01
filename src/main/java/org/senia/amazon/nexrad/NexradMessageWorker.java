@@ -82,7 +82,7 @@ public class NexradMessageWorker extends Thread implements Runnable {
 						String path = getPath(body);
 						String site = path.split("/")[3];
 						log.debug("Key: " + path);
-						if (site.equalsIgnoreCase("KOKX") || site.equalsIgnoreCase("KDOX")) {
+						if (site.equalsIgnoreCase("KOKX") || site.equalsIgnoreCase("KDOX") || site.equalsIgnoreCase("KBOX") || site.equalsIgnoreCase("KOAX")) {
 							NexradL2Engine.queueMap.add(path);
 							synchronized (QueueMonitor.lockObj) {
 								QueueMonitor.lockObj.notify();

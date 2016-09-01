@@ -14,11 +14,13 @@ public class NexradL2Engine {
 	public static String nexradOutputPath;
 	public static String l2refConfig;
 	public static String nexradQueueConfig;
+	public static String gradsScript;
 
 	public static void main(String[] args) {
 		nexradOutputPath = System.getProperty("nexradOutputPath");
 		l2refConfig = System.getProperty("l2refNexradConfig");
 		nexradQueueConfig = System.getProperty("nexradQueueConfig");
+		
 		long start = System.currentTimeMillis();
 		QueueMonitor qm = new QueueMonitor();
 		log.info("QueueMontior Class: "+qm.getClass().getName());

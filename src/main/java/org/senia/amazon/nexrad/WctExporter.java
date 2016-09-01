@@ -33,7 +33,11 @@ public class WctExporter {
         WCTExportBatch.processConfigFile(exporter, new File(configFile2), configReplacementsMap);
 	//BATCH RUN HERE
         infile = new File(inFile);
-        WCTExportBatch.doBatchExport(exporter, infile, outfile);
+        try {
+        	WCTExportBatch.doBatchExport(exporter, infile, outfile);
+        }catch (Exception e) {
+        	e.printStackTrace();
+        }
 	}
 	
 }
