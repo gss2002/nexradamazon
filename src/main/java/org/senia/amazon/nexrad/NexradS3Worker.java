@@ -62,7 +62,7 @@ public class NexradS3Worker extends Thread implements Runnable {
 				            // TODO Auto-generated catch block
 				            e.printStackTrace();
 				        }
-				} catch (IOException | NumberFormatException | XPathExpressionException | InstantiationException | SAXException | ParserConfigurationException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
