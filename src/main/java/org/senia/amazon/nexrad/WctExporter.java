@@ -10,31 +10,36 @@ import javax.xml.xpath.XPathExpressionException;
 
 import org.xml.sax.SAXException;
 
-import gov.noaa.ncdc.wct.WCTIospManager;
-import gov.noaa.ncdc.wct.export.WCTExport;
-import gov.noaa.ncdc.wct.export.WCTExportBatch;
+//import gov.noaa.ncdc.wct.WCTIospManager;
+//import gov.noaa.ncdc.wct.export.WCTExport;
+//import gov.noaa.ncdc.wct.export.WCTExportBatch;
+import ucar.nc2.util.DiskCache;
 
 public class WctExporter {
     private HashMap<String, String> configReplacementsMap = new HashMap<String, String>();
 
 	
 	public void convert2NC(String inFile, String outFile, String configFile) throws NumberFormatException, XPathExpressionException, SAXException, IOException, ParserConfigurationException, InstantiationException {
-        WCTExport exporter = new WCTExport();
-        WCTExportBatch exporterBatch = new WCTExportBatch();
-        WCTIospManager.registerWctIOSPs();
-        exporter.setAutoRenameOutput(false);
-        exporter.addDataExportListener(exporterBatch.new BatchExportListener());
-        exporter.setOutputFormat(WCTExportBatch.readOutputFormat("nc"));
-
+      //  WCTExport exporter = new WCTExport();
+       // WCTExportBatch exporterBatch = new WCTExportBatch();
+       // WCTIospManager.registerWctIOSPs();
+		//exporter.setUseWctCache(false);
+        //exporter.setAutoRenameOutput(false);
+        //exporter.addDataExportListener(exporterBatch.new BatchExportListener());
+        //exporter.setOutputFormat(WCTExportBatch.readOutputFormat("nc"));
+       // System.out.println("Exporter CACHE:"+ exporter.isUseWctCache());
         File infile;
         File outfile = new File(outFile);
         
-        String configFile2 = WCTExportBatch.parseConfigPathAndReplacements(configFile, configReplacementsMap);
-        WCTExportBatch.processConfigFile(exporter, new File(configFile2), configReplacementsMap);
+        //String configFile2 = WCTExportBatch.parseConfigPathAndReplacements(configFile, configReplacementsMap);
+        //WCTExportBatch.processConfigFile(exporter, new File(configFile2), configReplacementsMap);
 	//BATCH RUN HERE
         infile = new File(inFile);
         try {
-        	WCTExportBatch.doBatchExport(exporter, infile, outfile);
+        	//WCTExportBatch.doBatchExport(exporter, infile, outfile);
+            StringBuilder sbuff = new StringBuilder();
+        	DiskCache.cleanCache(100 * 1000, sbuff); // 100 Mbytes
+            sbuff.append("----------------------\n");
         }catch (Exception e) {
         	e.printStackTrace();
         }
