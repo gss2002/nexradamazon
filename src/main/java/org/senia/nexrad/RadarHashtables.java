@@ -1,7 +1,6 @@
 package org.senia.nexrad;
 
 
-import gov.noaa.ncdc.wct.WCTConstants;
 
 import java.io.File;
 import java.io.FileInputStream;

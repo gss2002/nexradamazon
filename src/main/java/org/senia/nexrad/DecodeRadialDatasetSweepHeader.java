@@ -67,13 +67,13 @@ public class DecodeRadialDatasetSweepHeader implements NexradHeader {
         	this.datasetDate = dateFormat.parse(attributeMap.get("time_coverage_start"));
         }
         else {
-        	this.datasetDate = radialDataset.getStartDate();
+        	this.datasetDate = radialDataset.getCalendarDateStart().toDate();
         }
 
         try {
-        	dataURL = new URL(radialDataset.getLocationURI());
+        	dataURL = new URL(radialDataset.getLocation());
         } catch (Exception e) {
-        	System.out.println(radialDataset.getLocationURI());
+        	System.out.println(radialDataset.getLocation());
         	e.printStackTrace();
         }
         

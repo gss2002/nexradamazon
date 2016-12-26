@@ -1,14 +1,34 @@
 package org.senia.amazon.nexrad;
 
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.Formatter;
+
 import org.geotools.gc.GridCoverage;
+import org.senia.nexrad.DecodeException;
+import org.senia.nexrad.DecodeHintNotSupportedException;
+import org.senia.nexrad.DecodeRadialDatasetSweep;
 import org.senia.nexrad.DecodeRadialDatasetSweepHeader;
 import org.senia.nexrad.RadarHashtables;
 import org.senia.nexrad.RadialDatasetSweepRemappedRaster;
+import org.senia.nexrad.StreamingProcess;
 import org.senia.nexrad.SupportedDataType;
+import org.senia.nexrad.WCTDataUtils;
+import org.senia.nexrad.WCTExportException;
+import org.senia.nexrad.WCTExportNoDataException;
+import org.senia.nexrad.WCTRasterExport;
+import org.senia.nexrad.WCTRasterExport.GeoTiffType;
+import org.senia.nexrad.WCTRasterizer;
 import org.senia.nexrad.WCTUtils;
 
+import ucar.ma2.InvalidRangeException;
 import ucar.nc2.constants.FeatureType;
 import ucar.nc2.dt.RadialDatasetSweep;
+import ucar.nc2.ft.FeatureDatasetFactoryManager;
+import ucar.nc2.util.CancelTask;
 
 public class TestNexradL2 {
     public static enum ExportFormatType { UNKNOWN, NATIVE, VECTOR, RASTER }; 
@@ -19,96 +39,94 @@ public class TestNexradL2 {
         GRIDDED_NETCDF, VTK, WCT_RASTER_OBJECT_ONLY,
         KMZ
     }
-
-	public static void main(String[] args) {
-		SupportedDataType currentDataType;
-		// TODO Auto-generated method stub
-		if (currentDataType == SupportedDataType.RADIAL) {
-
-			RadialDatasetSweep radialDataset = (RadialDatasetSweep) TypedDatasetFactory.open(FeatureType.RADIAL, dataURL.toString(),
-					WCTUtils.getSharedCancelTask(), new StringBuilder());
-
-			DecodeRadialDatasetSweepHeader radialDatasetHeader;
-			if (radialDatasetHeader == null) {
-				radialDatasetHeader = new DecodeRadialDatasetSweepHeader();
-			}
-			radialDatasetHeader.setRadialDatasetSweep(radialDataset);
-			DecodeRadialDatasetSweepHeader header = radialDatasetHeader;
-
-			String urlString = dataURL.toString();
-			if (radialDatasetHeader.getICAO().equals("XXXX")) {
-				int idx = urlString.lastIndexOf('/');
-				String icao = urlString.substring(idx + 1, idx + 5);
-				if (icao.equals("6500")) {
-					icao = urlString.substring(idx + 5, idx + 9);
-				}
-
-				System.err.println("SETTING SITE FROM FILENAME FOR: " + icao);
-
-				RadarHashtables nxhash = RadarHashtables.getSharedInstance();
-				radialDatasetHeader.setStationInfo(icao, nxhash.getLat(icao), nxhash.getLon(icao),
-						nxhash.getElev(icao));
-			}
-
-			ExportFormatType outputType;
-			if (outputType == ExportFormatType.RASTER) {
-				Object radialDatasetRaster;
-				if (radialDatasetRaster == null) {
-					radialDatasetRaster = new RadialDatasetSweepRemappedRaster();
-					radialDatasetRaster.addDataDecodeListener(this);
-				}
-
-				String variableName = radialExportVariable == null ? radialDataset.getDataVariables().get(0).toString()
-						: radialExportVariable;
-				if (exportRadialFilter.getExtentFilter() == null) {
-					bounds = header.getNexradBounds();
-				} else {
-					bounds = exportRadialFilter.getExtentFilter();
-				}
-
-				if (exportGridCellSize > 0.0) {
-
-					// calculate the raster size needed in decimal degrees
-					// find number grid cells needed for 'long' side of grid
-					double longSide = (bounds.getWidth() > bounds.getHeight()) ? bounds.getWidth() : bounds.getHeight();
-					this.exportGridSize = (int) Math.round(longSide / exportGridCellSize);
-					// rasterizer.setSize(new Dimension(exportGridSize,
-					// exportGridSize));
-					double boundsDiff = longSide - (exportGridSize * exportGridCellSize);
-					bounds.setRect(bounds.getX() - boundsDiff / 2.0, bounds.getY() + boundsDiff / 2.0,
-							bounds.getWidth() + boundsDiff, bounds.getHeight() + boundsDiff);
-
-					logger.fine("SETTING GRID CELL SIZE: " + exportGridCellSize);
-					logger.fine("SETTING GRID SIZE: " + exportGridSize);
-					logger.fine("BOUNDS DIFF: " + boundsDiff);
-				}
-				radialDatasetRaster.setHeight(exportGridSize);
-				radialDatasetRaster.setWidth(exportGridSize);
-
-				radialDatasetRaster.setVariableName(variableName);
-				radialDatasetRaster.setSweepIndex(radialExportCut);
-				radialDatasetRaster.setWctFilter(wctFilter);
-				dataURL = WCTDataUtils.scan(dataURL, scannedFile, useWctCache, true, SupportedDataType.RADIAL);
-				if (Double.isNaN(radialExportCappiHeightInMeters)) {
-					radialDatasetRaster.process(dataURL.toString(), bounds);
-				} else {
-					radialDatasetRaster.processCAPPI(dataURL.toString(), bounds,
-							new double[] { radialExportCappiHeightInMeters }, radialExportCappiInterpolationType);
-				}
-
-				genericRaster = radialDatasetRaster;
-
-				if (exportGridSmoothFactor > 0) {
-					radialDatasetRaster.setSmoothingFactor(exportGridSmoothFactor);
-					GridCoverage gc = radialDatasetRaster.getGridCoverage(0);
-					java.awt.image.RenderedImage renderedImage = gc.getRenderedImage();
-					Raster raster = renderedImage.getData();
-
-					radialDatasetRaster.setWritableRaster((WritableRaster) (renderedImage.getData()));
-					rasterizer.setWritableRaster((WritableRaster) raster);
-				}
-			}
+    
+	public static void main(String [] args) {
+		try {
+			doMosaic();
+		} catch (DecodeException | WCTExportException | IOException | ParseException
+				| DecodeHintNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	}
+    }
+
+    public static void doMosaic() throws DecodeException, WCTExportNoDataException, WCTExportException, IOException, ParseException, DecodeHintNotSupportedException {
+        
+        // Setup files
+        URL[] urls = new URL[] {
+            new File("/Users/gsenia/radardata/KCLE.ar2v").toURI().toURL(),
+        };
+        
+        // Setup rasterizer
+        final WCTRasterizer rasterizer = new WCTRasterizer(1200, 1200);
+        rasterizer.setAttName("value");
+        // Setup geographic extent of interest
+        // -83.5, 31, -77, 37.5
+        rasterizer.setBounds(new Rectangle.Double(-83.5, 31, 6.5, 6.5));
+        rasterizer.setEqualCellsize(true);
+
+        // Loop through files, decode and rasterize onto single grid keeping the max value at each pixel
+        for (URL url : urls) {
+
+            // Create a bogus CancelTask to send in to the data decoder
+            CancelTask emptyCancelTask = new CancelTask() {
+				@Override
+                public boolean isCancel() {
+                    return false;
+                }
+				@Override
+                public void setError(String arg0) {
+                }
+				@Override
+				public void setProgress(String arg0, int arg1) {
+				}
+            };
+
+
+            RadialDatasetSweep radialDataset = (RadialDatasetSweep) FeatureDatasetFactoryManager.open(
+                        FeatureType.RADIAL, 
+                        url.toString(), emptyCancelTask, new Formatter());
+
+
+            
+            DecodeRadialDatasetSweepHeader header = new DecodeRadialDatasetSweepHeader();
+            header.setRadialDatasetSweep(radialDataset);
+            DecodeRadialDatasetSweep radialDatasetDecoder = new DecodeRadialDatasetSweep(header);
+            
+            // This sets the 'moment' or variable to process
+            RadialDatasetSweep.RadialVariable radialVar = (RadialDatasetSweep.RadialVariable) radialDataset.getDataVariable("Reflectivity");
+            radialDatasetDecoder.setRadialVariable(radialVar);
+
+            
+//            USE THIS OPTION TO FILTER ON ATTRIBUTES SUCH AS VALUE RANGE, HEIGHT, ETC...
+//            radialDatasetDecoder.setDecodeHint("nexradFilter", exportRadialFilter);
+            
+//            THIS OPTION SETS THE SWEEPS TO PROCESS TO ONLY THE FIRST (LOWEST)
+            radialDatasetDecoder.setDecodeHint("startSweep", new Integer(0));
+            radialDatasetDecoder.setDecodeHint("endSweep", new Integer(0));
+
+            radialDatasetDecoder.decodeData(new StreamingProcess[] { rasterizer });
+            
+        }
+        
+        WCTRasterExport export = new WCTRasterExport();
+		// Export mosaic grid to ASCII GRID file
+        try {
+			export.saveGeoTIFF(new File("/Users/gsenia/KCLE.geotiff"), rasterizer, GeoTiffType.TYPE_32_BIT);
+		} catch (InvalidRangeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			export.saveNetCDF(new File("/Users/gsenia/KCLE"), rasterizer);
+		} catch (InvalidRangeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        export.saveAsciiGrid(new File("/Users/gsenia/KCLE.asc"), rasterizer);
+        export.saveGrADSBinary(new File("/Users/gsenia/KCLE.grads"), rasterizer);
+
+        
+    }
 
 }

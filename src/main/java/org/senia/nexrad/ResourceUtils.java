@@ -1,7 +1,5 @@
 package org.senia.nexrad;
 
-import gov.noaa.ncdc.common.URLTransfer;
-import gov.noaa.ncdc.wct.decoders.nexrad.WCTTransferProgressDialog;
 
 import java.awt.Frame;
 import java.io.File;

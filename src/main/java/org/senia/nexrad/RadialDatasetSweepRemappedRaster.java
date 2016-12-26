@@ -35,6 +35,8 @@ import org.geotools.gc.GridCoverage;
 import org.geotools.pt.Envelope;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
+import org.senia.nexrad.SmoothingOperation.SmoothingInfo;
+import org.senia.nexrad.WCTGridCoverageSupport.AlphaInterpolationType;
 import org.xml.sax.SAXException;
 
 import ucar.nc2.Attribute;
@@ -340,7 +342,7 @@ public class RadialDatasetSweepRemappedRaster implements WCTRaster {
 
 
 
-			this.datetime = radialDataset.getStartDate();
+			this.datetime = radialDataset.getCalendarDateStart().toDate();
 			this.longName = radialDataset.getDescription();
 
 
@@ -997,7 +999,7 @@ public class RadialDatasetSweepRemappedRaster implements WCTRaster {
 
 
 
-			this.datetime = radialDataset.getStartDate();
+			this.datetime = radialDataset.getCalendarDateStart().toDate();
 			this.longName = radialDataset.getDescription();
 
 
