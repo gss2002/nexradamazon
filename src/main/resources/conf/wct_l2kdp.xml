@@ -1,19 +1,11 @@
 <?xml version="1.0"?>
 <wctExportBatchOptions version="3">
-   <!--
-      Logging options: These can be 'SEVERE', 'WARNING', 'INFO', 'DEBUG'
-   -->
    <logging> INFO</logging>
-   <useCache> TRUE</useCache>
-
-	
-	
-	
+   <useCache> FALSE</useCache>
 	<!--  ============================================================== -->
 	<!--  Grid Section - decoding and filtering options                 -->
 	<!--  ============================================================== -->
    <grid>
-   
    <!--   match="exact|ignoreCase|wildcard|regex"  sometime in the future? -->
       <gridOptions>
          <variable name="Total_precipitation"/>
@@ -22,7 +14,6 @@
          <runtime lookupType="index" lookup="0"  />
          <height  lookupType="index" lookup="0"  />
       </gridOptions>
-   
       <gridFilter>
          <!--
             Geographic Extent Filter units of decimal degrees
@@ -71,7 +62,7 @@
             For Level-II NEXRAD this can be: 'Reflectivity',
             'RadialVelocity' or 'SpectrumWidth'
          -->
-         <variable> Reflectivity</variable>
+         <variable> DifferentialPhase</variable>
          <!--
             integer sweep (sometimes called cut, not elevation angle) of
             radar file - some sweeps will not contain any information
@@ -106,7 +97,7 @@
      
          <!-- Range Filter units of kilometers -->
          <minRange> NONE</minRange>
-         <maxRange> 10.0</maxRange>
+         <maxRange> 230.0</maxRange>
          <!-- Azimuth Filter units of decimal degrees -->
          <minAzimuth> NONE</minAzimuth>
          <maxAzimuth> NONE</maxAzimuth>
@@ -324,5 +315,4 @@
    <!--
    <multipleTimestepHandler operation="EXPORT_ALL" />
    -->
-   
 </wctExportBatchOptions>

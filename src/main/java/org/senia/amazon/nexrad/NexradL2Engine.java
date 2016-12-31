@@ -14,12 +14,31 @@ public class NexradL2Engine {
 	private static final Logger log = LoggerFactory.getLogger(NexradL2Engine.class);
 	public static String nexradOutputPath;
 	public static String l2refConfig;
+	public static String l2bvConfig;
+	public static String l2ccConfig;
+	public static String l2zdrConfig;
+	public static String l2kdpConfig;
+	public static String l2swConfig;
+	public static String radar_home;
+
+
+
+
 	public static String nexradQueueConfig;
 	public static String gradsScript;
 
 	public static void main(String[] args) {
 		nexradOutputPath = System.getProperty("nexradOutputPath");
 		l2refConfig = System.getProperty("l2refNexradConfig");
+		l2bvConfig = System.getProperty("l2bvNexradConfig");
+		l2ccConfig = System.getProperty("l2ccNexradConfig");
+		l2zdrConfig = System.getProperty("l2zdrNexradConfig");
+		l2kdpConfig = System.getProperty("l2kdpNexradConfig");
+		l2swConfig = System.getProperty("l2swNexradConfig");
+		radar_home = System.getProperty("radar_home");
+
+
+
 		nexradQueueConfig = System.getProperty("nexradQueueConfig");
 		
 		long start = System.currentTimeMillis();

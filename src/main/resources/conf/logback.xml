@@ -8,7 +8,7 @@
 		<file>/home/gsenia/radarv2/logs/nexrad.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- daily rollover -->
-			<fileNamePattern>/home/gsenia/radarv2/logs/nexrad.log.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>/home/gsenia/radarv2/logs/nexrad.log.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
             		<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 		<maxFileSize>5MB</maxFileSize>
             		</timeBasedFileNamingAndTriggeringPolicy>
