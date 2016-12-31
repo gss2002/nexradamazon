@@ -48,16 +48,15 @@ public class NexradS3Worker extends Thread implements Runnable {
 				        InputStreamReader isr = new InputStreamReader(is);
 				        BufferedReader br = new BufferedReader(isr);
 				        String line;
-				        System.out.printf("Output of running %s is:\n",
-				                Arrays.toString(command));
+				        log.info("Output of running %s is:\n", Arrays.toString(command));
 				        while ((line = br.readLine()) != null) {
-				            System.out.println(line);
+				            log.info(line);
 				        }
 				        
 				        //Wait to get exit value
 				        try {
 				            int exitValue = process.waitFor();
-				            System.out.println("\n\nExit Value is " + exitValue);
+				            log.info("\n\nExit Value is " + exitValue);
 				        } catch (InterruptedException e) {
 				            // TODO Auto-generated catch block
 				            e.printStackTrace();

@@ -21,6 +21,15 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>2.5</version>
+				<configuration>
+					<excludes>
+						<exclude>**/log4j.properties</exclude>
+						<exclude>**/logback.xml</exclude>
+						<exclude>**/nexrad.sh</exclude>
+						<exclude>**/nexrad.queues</exclude>
+						<exclude>**/wct_l2ref.xml</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-assembly-plugin</artifactId> 
 				<version>2.5.3</version> <configuration> <archive> <manifest> <mainClass>org.senia.amazon.nexrad.NexradL2Engine</mainClass> 
@@ -125,5 +134,25 @@
 			<version>4.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+		        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>1.7.7</version>
+        </dependency>
 	</dependencies>
 </project>
