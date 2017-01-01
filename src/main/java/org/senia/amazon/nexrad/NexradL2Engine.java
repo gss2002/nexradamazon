@@ -1,16 +1,21 @@
 package org.senia.amazon.nexrad;
 
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-
 public class NexradL2Engine {
-    public static Queue<String> queueMap = new LinkedList<String>();
+	public static Queue<String> queueMap = new LinkedList<String>();
 	private static final Logger log = LoggerFactory.getLogger(NexradL2Engine.class);
 	public static String nexradOutputPath;
 	public static String l2refConfig;
@@ -20,9 +25,7 @@ public class NexradL2Engine {
 	public static String l2kdpConfig;
 	public static String l2swConfig;
 	public static String radar_home;
-
-
-
+	public static List<String> radar_list;
 
 	public static String nexradQueueConfig;
 	public static String gradsScript;
@@ -38,19 +41,19 @@ public class NexradL2Engine {
 		radar_home = System.getProperty("radar_home");
 
 
-
 		nexradQueueConfig = System.getProperty("nexradQueueConfig");
-		
+
 		long start = System.currentTimeMillis();
 		// Optionally remove existing handlers attached to j.u.l root logger
-		 SLF4JBridgeHandler.removeHandlersForRootLogger();  // (since SLF4J 1.6.5)
+		SLF4JBridgeHandler.removeHandlersForRootLogger(); // (since SLF4J 1.6.5)
 
-		 // add SLF4JBridgeHandler to j.u.l's root logger, should be done once during
-		 // the initialization phase of your application
-		 SLF4JBridgeHandler.install();
+		// add SLF4JBridgeHandler to j.u.l's root logger, should be done once
+		// during
+		// the initialization phase of your application
+		SLF4JBridgeHandler.install();
 		QueueMonitor qm = new QueueMonitor();
-		log.info("QueueMontior Class: "+qm.getClass().getName());
-		
+		log.info("QueueMontior Class: " + qm.getClass().getName());
+
 		NexradMessageWorker nexradMsgThread = new NexradMessageWorker("NexradMessageThread", nexradQueueConfig);
 		NexradS3Worker nexradS3Worker = new NexradS3Worker();
 		nexradS3Worker.setName("NexradS3Thread");
@@ -60,7 +63,22 @@ public class NexradL2Engine {
 		log.info("Finished starting threads");
 
 		long end = System.currentTimeMillis();
-		log.info("StartupTime: "+(end - start) + "ms");
+		log.info("StartupTime: " + (end - start) + "ms");
 
+	}
+
+	public static void loadRadarList() {
+		String radarfile = radar_home+"/conf/radar.sites";
+		radar_list = new ArrayList<>();
+
+		try (Stream<String> stream = Files.lines(Paths.get(radarfile))) {
+
+			// 1. convert all content to upper case
+			// 2. convert it into a List
+			radar_list = stream.map(String::toUpperCase).collect(Collectors.toList());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

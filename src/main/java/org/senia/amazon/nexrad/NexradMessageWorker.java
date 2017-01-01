@@ -1,6 +1,7 @@
 package org.senia.amazon.nexrad;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -73,6 +74,7 @@ public class NexradMessageWorker extends Thread implements Runnable {
 			request.setVisibilityTimeout(5);
 			boolean queueExists = true;
 			while (queueExists) {
+				NexradL2Engine.loadRadarList();
 				ReceiveMessageResult result = sqs.receiveMessage(request);
 				if (result.getMessages().isEmpty()) {
 					queueExists = false;
@@ -82,7 +84,9 @@ public class NexradMessageWorker extends Thread implements Runnable {
 						String path = getPath(body);
 						String site = path.split("/")[3];
 						log.debug("Key: " + path);
-						if (site.equalsIgnoreCase("KOKX") || site.equalsIgnoreCase("KDOX") || site.equalsIgnoreCase("KBOX") || site.equalsIgnoreCase("KOAX")) {
+						List<String> radarlist = NexradL2Engine.radar_list;
+						if (radarlist.contains(site)) {
+						//if (site.equalsIgnoreCase("KOKX") || site.equalsIgnoreCase("KDOX") || site.equalsIgnoreCase("KBOX") || site.equalsIgnoreCase("KOAX")) {
 							NexradL2Engine.queueMap.add(path);
 							synchronized (QueueMonitor.lockObj) {
 								QueueMonitor.lockObj.notify();
