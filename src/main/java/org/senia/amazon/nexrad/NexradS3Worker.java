@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -14,6 +16,8 @@ import javax.xml.xpath.XPathExpressionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+
+import ucar.nc2.util.DiskCache;
 
 public class NexradS3Worker extends Thread implements Runnable {
 	public AwsS3 nexradS3;
@@ -103,6 +107,25 @@ public class NexradS3Worker extends Thread implements Runnable {
 				}
 			}
 		}
+	}
+	
+	public void deleteWctCacheFile(String nexr) {
+		String nexrFile = null;
+		try {
+			String cacheDir = DiskCache.getRootDirectory();
+			nexrFile = URLEncoder.encode(nexr, "UTF-8");
+			nexrFile = cacheDir+"/"+nexrFile;
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (nexrFile != null) {
+			File nexradFile = new File(nexrFile); 
+			if (nexradFile.exists()) {
+				nexradFile.delete();				
+			}
+		}
+		
 	}
 
 }
