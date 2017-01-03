@@ -56,6 +56,7 @@ public class NexradS3Worker extends Thread implements Runnable {
 					wct.convert2NC(nexr, nexrout + ".sw", l2swConfig);
 					File deleteNexrFile = new File(nexr);
 					deleteNexrFile.delete();
+					deleteWctCacheFile(nexr);
 
 					String[] command = { radar_home + "/radar_scripts/radar.sh", site, nexrout };
 					ProcessBuilder probuilder = new ProcessBuilder(command);
@@ -114,7 +115,7 @@ public class NexradS3Worker extends Thread implements Runnable {
 		try {
 			String cacheDir = DiskCache.getRootDirectory();
 			nexrFile = URLEncoder.encode(nexr, "UTF-8");
-			nexrFile = cacheDir+"/"+nexrFile;
+			nexrFile = cacheDir+"/"+nexrFile+".uncompress";
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
